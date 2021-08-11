@@ -27,6 +27,9 @@ from woob.browser.url import URL
 from woob.browser.pages import JsonPage, HTMLPage
 from woob.tools.log import createColoredFormatter
 
+from abc import ABCMeta, abstractmethod
+import copy
+
 SLEEP_INTERVAL_AFTER_CONNECTION_ERROR = 5
 SLEEP_INTERVAL_AFTER_LOGIN_ERROR = 10
 SLEEP_INTERVAL_AFTER_CENTER = 1
@@ -751,27 +754,7 @@ class Application:
 
         vaccine_list = [docto.vaccine_motives[motive] for motive in motives]
 
-        
-
-        
-        class TimeAndDate(JSonPage):
-        ''' Placing main instances of logging time and date in one class for aggregation '''
-        
-        def log(text, *args, **kwargs):
-            args = (colored(arg, 'yellow') for arg in args)
-             if 'color' in kwargs:
-              text = colored(text, kwargs.pop('color'))
-             text = text % tuple(args)
-             print(text, **kwargs)
-
-
-        def log_ts(text=None, *args, **kwargs):
-            ''' Log with timestamp'''
-         now = datetime.datetime.now()
-            print("[%s]" % now.isoformat(" ", "seconds"))
-            if text:
-            log(text, *args, **kwargs)
-        
+               
         
         if args.start_date:
             try:
@@ -867,7 +850,67 @@ class Application:
                 return 1
         return 0
 
+    def log(text, *args, **kwargs):
+            args = (colored(arg, 'yellow') for arg in args)
+             if 'color' in kwargs:
+              text = colored(text, kwargs.pop('color'))
+             text = text % tuple(args)
+             print(text, **kwargs)
 
+
+        def log_ts(text=None, *args, **kwargs):
+            ''' Log with timestamp'''
+         now = datetime.datetime.now()
+            print("[%s]" % now.isoformat(" ", "seconds"))
+            if text:
+            log(text, *args, **kwargs)
+    
+    class logs(metaclass = ABCMeta):
+      
+            # constructor 
+            def __init__(self):
+                self.id = None
+                self.type = None
+
+            @abstractmethod
+            def logs(self):
+                pass
+            
+            def get_type(self):
+                return self.type
+
+            def get_id(self):
+                return self.id
+
+            def set_id(self, sid):
+                self.id = sid
+
+            def clone(self):
+                return copy.copy(self)
+  
+        # class - log without timestamp
+        class log(logs):
+            def __init__(self):
+                super().__init__()
+                self.type = "log without timestamp"
+
+            def logs(self):
+                print("Log without timestamp::logs() method")
+
+        # class - log with timestamp
+        class log_ts(logs):
+            def __init__(self):
+                super().__init__()
+                self.type = "log with timestamp"
+
+            def log_ts(self):
+                print("Log with timestamp::logs() method")  
+    
+
+    
+    
+    
+    
 if __name__ == '__main__':
     try:
         sys.exit(Application().main())

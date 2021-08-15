@@ -752,10 +752,6 @@ class Application:
         vaccine_list = [docto.vaccine_motives[motive] for motive in motives]
 
         
-
-        
-        class TimeAndDate(JSonPage):
-        ''' Placing main instances of logging time and date in one class for aggregation '''
         
         def log(text, *args, **kwargs):
             args = (colored(arg, 'yellow') for arg in args)
@@ -773,6 +769,51 @@ class Application:
             log(text, *args, **kwargs)
         
         
+        
+        
+              
+            class Target:
+                """
+                The Target defines the domain-specific interface used by the client code.
+                """
+
+                def log(self) :
+                    return 1
+
+           
+                
+            class Adaptee:
+                """
+                The Adaptee contains some useful behavior, but its interface is incompatible
+                with the existing client code. The Adaptee needs some adaptation before the
+                client code can use it.
+                """
+
+                 def log_ts(self) :
+                    return 1
+
+
+            class Adapter(Target, Adaptee):
+                """
+                The Adapter makes the Adaptee's interface compatible with the Target's
+                interface via multiple inheritance.
+                """
+
+                def log(self):
+                    return f"Adapter: (TRANSLATED) {self.log_ts()}"
+
+
+            def client_code(target: "Target") -> None:
+                """
+                The client code supports all classes that follow the Target interface.
+                """
+
+                print(target.log(), end="")
+        
+
+    
+
+
         if args.start_date:
             try:
                 start_date = datetime.datetime.strptime(
